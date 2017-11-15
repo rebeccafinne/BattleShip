@@ -1,8 +1,14 @@
 
+import Test.QuickCheck
 
+
+-------------------------------------------------------------------------
+
+-- | Representation of sudoku puzzlese (allows some junk)
 data Sudoku = Sudoku { rows :: [[Maybe Int]] }
+ deriving ( Show, Eq )
 
-
+-- | A sample sudoku puzzle
 example :: Sudoku
 example =
     Sudoku
@@ -19,3 +25,67 @@ example =
   where
     n = Nothing
     j = Just
+
+-- * A1
+
+-- | allBlankSudoku is a sudoku with just blanks
+allBlankSudoku :: Sudoku
+allBlankSudoku = Sudoku (replicate 9 (replicate 9 Nothing))
+
+-- * A2
+
+-- | isSudoku sud checks if sud is really a valid representation of a sudoku
+-- puzzle
+isSudoku :: Sudoku -> Bool
+isSudoku s = and [isRow s, isNumber s, isColumns s]
+
+isRow :: Sudoku -> Bool
+isRow s = length (rows s) == 9
+
+isNumber :: Sudoku -> Bool
+isNumber s = True--s
+
+isColumns :: Sudoku -> Bool
+isColumns s = foldr (+) 0 (map length (rows s)) == 81 
+
+-- * A3
+
+-- | isFilled sud checks if sud is completely filled in,
+-- i.e. there are no blanks
+isFilled :: Sudoku -> Bool
+isFilled = undefined
+
+-------------------------------------------------------------------------
+
+-- * B1
+
+-- |b printSudoku sud prints a nice representation of the sudoku sud on
+-- the screen
+printSudoku :: Sudoku -> IO ()
+printSudoku = undefined
+
+-- * B2
+
+-- | readSudoku file reads from the file, and either delivers it, or stops
+-- if the file did not contain a sudoku
+readSudoku :: FilePath -> IO Sudoku
+readSudoku = undefined
+
+-------------------------------------------------------------------------
+
+-- * C1
+
+-- | cell generates an arbitrary cell in a Sudoku
+cell :: Gen (Maybe Int)
+cell = undefined
+
+
+-- * C2
+
+-- | an instance for generating Arbitrary Sudokus
+instance Arbitrary Sudoku where
+  arbitrary =
+    do rows <- vectorOf 9 (vectorOf 9 cell)
+       return (Sudoku rows)
+
+-------------------------------------------------------------------------
