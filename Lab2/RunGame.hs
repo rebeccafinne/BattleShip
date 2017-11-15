@@ -16,6 +16,10 @@ data Interface = Interface
   , iShuffle  :: StdGen -> Hand -> Hand
   }
 
+
+
+
+
 -- | A type of players.
 data Player = Guest | Bank
               deriving (Show, Eq)
