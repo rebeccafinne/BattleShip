@@ -1,5 +1,7 @@
 
 import Test.QuickCheck
+import Data.Maybe
+
 
 
 -------------------------------------------------------------------------
@@ -15,7 +17,7 @@ example =
       [ [j 3,j 6,n  ,n  ,j 7,j 1,j 2,n  ,n  ]
       , [n  ,j 5,n  ,n  ,n  ,n  ,j 1,j 8,n  ]
       , [n  ,n  ,j 9,j 2,n  ,j 4,j 7,n  ,n  ]
-      , [n  ,n  ,n  ,n  ,j 1,j 3,n  ,j 2,j 8]
+      , [n  ,n  ,n  ,n  ,j 1,j 3,n  ,j 2,j 8:]
       , [j 4,n  ,n  ,j 5,n  ,j 2,n  ,n  ,j 9]
       , [j 2,j 7,n  ,j 4,j 6,n  ,n  ,n  ,n  ]
       , [n  ,n  ,j 5,j 3,n  ,j 8,j 9,n  ,n  ]
@@ -43,10 +45,12 @@ isRow :: Sudoku -> Bool
 isRow s = length (rows s) == 9
 
 isNumber :: Sudoku -> Bool
-isNumber s = True--s
+isNumber s | maximum (map maximum ([ map fromJust (filter isJust x) | x <- rows s]))>9 = False
+isNumber s | minimum (map minimum ([ map fromJust (filter isJust x) | x <- rows s]))<0 = False
+isNumber s | otherwise = True
 
 isColumns :: Sudoku -> Bool
-isColumns s = foldr (+) 0 (map length (rows s)) == 81 
+isColumns s = foldr (+) 0 (map length (rows s)) == 81
 
 -- * A3
 
