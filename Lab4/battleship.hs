@@ -172,32 +172,25 @@ main = do
   board2 <- (randomKey theMap g2)
   gameLoop board1 board2 1 2
 
-gameLoop :: Board -> Board -> Int -> Int -> IO ()
-gameLoop board1 board2 player1 player2 | gameFinished board1 && gameFinished board2 =
-  do
-    putStrLn "Congratulations both players won! \n Play again? y or n"
-    yn <- getLine
-    if yn == "y"
-      then main
-    else
-      putStrLn "Hope to see you again!"
-gameLoop board1 board2 player1 player2 |  gameFinished board1 =
-  do
-    putStrLn "Congratulations Player 1 won! \n Play again? y or n"
-    yn <- getLine
-    if yn == "y"
-      then main
-    else
-      putStrLn "Hope to see you again!"
-gameLoop board1 board2 player1 player2 | gameFinished board2 =
-  do
-    putStrLn "Congratulations Player 2 won! \n Play again? y or n"
-    yn <- getLine
-    if yn == "y"
-      then main
-      else
+announceWinner :: String -> IO()
+announceWinner winner = 
+   do 
+     putStrLn ("Congratulations " ++ winner ++ " won! \n Play again? y or n")
+     yn <- getLine
+     if yn == "y"
+        then main
+     else
         putStrLn "Hope to see you again!"
-gameLoop board1 board2 player1 player2 | otherwise =
+
+gameLoop :: Board -> Board -> Int -> Int -> IO ()
+gameLoop board1 board2 player1 player2 | gameFinished board1 && 
+                                         gameFinished board2 = 
+                                         announceWinner "both players"
+                                       | gameFinished board1 = 
+                                         announceWinner "Player 1"
+                                       | gameFinished board2 = 
+                                         announceWinner "Player 2"
+                                       | otherwise =
   do
     putStrLn "Player 1 board: "
     printBoard board1
