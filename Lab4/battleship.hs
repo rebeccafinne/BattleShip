@@ -175,8 +175,8 @@ main = do
   gameLoop board1 board2 1 2
 
 announceWinner :: String -> IO()
-announceWinner winner = 
-   do 
+announceWinner winner =
+   do
      putStrLn ("Congratulations " ++ winner ++ " won! \n Play again? y or n")
      yn <- getLine
      if yn == "y"
@@ -185,12 +185,12 @@ announceWinner winner =
         putStrLn "Hope to see you again!"
 
 gameLoop :: Board -> Board -> Int -> Int -> IO ()
-gameLoop board1 board2 player1 player2 | gameFinished board1 && 
-                                         gameFinished board2 = 
+gameLoop board1 board2 player1 player2 | gameFinished board1 &&
+                                         gameFinished board2 =
                                          announceWinner "both players"
-                                       | gameFinished board1 = 
+                                       | gameFinished board1 =
                                          announceWinner "Player 1"
-                                       | gameFinished board2 = 
+                                       | gameFinished board2 =
                                          announceWinner "Player 2"
                                        | otherwise =
   do
@@ -209,26 +209,18 @@ gameLoop board1 board2 player1 player2 | gameFinished board1 &&
 
 gameTurn :: Board -> Int -> IO Board
 gameTurn board player = do
-  putStrLn $ "Player " ++ (show player) ++ " guess the row"
-  row <- readLn
-  untilM row board
-  putStrLn $ "Player "++ (show player) ++ " guess the column"
-  cell <- readLn
-  untilM cell board
+  row <- makeGuess board player "row"
+  cell <- makeGuess board player "column"
   return (updateBoard board ((row-1), (cell -1)))
-    {-}  if (cell-1) < length ((rows board)!!(row-1)) && (cell-1) >= 0
-        then do
-
-      else do
-        putStrLn $ "Sorry the number is not okay, try again"
-        return board
-  else do
-    return board-}
 
 
-untilM :: Int -> Board -> IO Int
-untilM ans board =
+makeGuess :: Board -> Int -> String -> IO Int
+makeGuess board player rc =
        do
-          if ((ans-1) < length (rows board) && (ans-1) >= 0)
+         putStrLn $ "Player "++ (show player) ++ " guess the " ++ rc
+         ans <- readLn
+         if ((ans-1) < length (rows board) && (ans-1) >= 0)
             then do return ans
-               else do untilM ans board
+               else do
+                 putStrLn "Not okay"
+                 makeGuess board player rc
