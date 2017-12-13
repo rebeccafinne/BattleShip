@@ -114,7 +114,7 @@ replaceState xs (pos,val) = let (ys,zs) = splitAt pos xs in ys ++ [val]
                                    ++ (tail zs)
 
 
---Kollar om spelet är slut
+--Checks if the game is finished
 gameFinished :: Board -> Bool
 gameFinished board | length [boardToList board |
                      row <- [0..(length (rows board)) - 1],
