@@ -122,9 +122,11 @@ gameFinished board | length [boardToList board |
                      getState board (row,cell) == SneakyShip] == 0 = True
 gameFinished board | otherwise = False
 
--- | Helps the gameFinished method
-boardToList :: Board -> [CellState]
-boardToList board  = [rightCells | rows <- (rows board), rightCells <- rows]
+
+prop_gameFinished :: Board -> Bool
+prop_gameFinished b | gameFinished b == True = SneakyShip `notElem` (boardToList b)
+prop_gameFinished b | otherwise = SneakyShip `elem` (boardToList b)
+
 
 -- | Checks so the original board and generated list contains same nbr of cells
 prop_boardToList :: Board -> Bool
@@ -178,6 +180,7 @@ main = do
   p2 <- getLine
   gameLoop board1 board2 p1 p2
 
+
 announceWinner :: String -> IO()
 announceWinner winner =
    do
@@ -189,7 +192,7 @@ announceWinner winner =
         putStrLn "Hope to see you again!"
 
 gameLoop :: Board -> Board -> String -> String -> IO ()
-gameLoop b1 b2 p1 p2 | gameFinished b1 && gameFinished b2 = 
+gameLoop b1 b2 p1 p2 | gameFinished b1 && gameFinished b2 =
                        announceWinner "both players"
                      | gameFinished b1 = announceWinner p1
                      | gameFinished b2 = announceWinner p2
@@ -207,14 +210,15 @@ gameLoop b1 b2 p1 p2 | gameFinished b1 && gameFinished b2 =
     b2 <- (gameTurn b2 p2)
     gameLoop b1 b2 p1 p2
 
-
+-- | Make sure both players can make a guess
 gameTurn :: Board -> String -> IO Board
 gameTurn board player = do
   row <- makeGuess board player "row"
   cell <- makeGuess board player "column"
   return (updateBoard board ((row-1), (cell -1)))
 
-
+-- | The player makes a guess, have to redo guess if
+-- the number is outside the board
 makeGuess :: Board -> String -> String -> IO Int
 makeGuess board player rc =
        do
