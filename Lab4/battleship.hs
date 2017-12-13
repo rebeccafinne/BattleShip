@@ -160,6 +160,8 @@ readBoard file = do
         makeBoard (x:xs) | x == 'W' = SneakyWater : (makeBoard xs)
         makeBoard x      | otherwise = []
 
+
+
 main :: IO ()
 main = do
   let theMap = fromList ([(1,"b1.boa"),(2,"b2.boa"),(3,"b3.boa"),(4,"b4.boa")
@@ -177,8 +179,8 @@ main = do
   gameLoop board1 board2 p1 p2
 
 announceWinner :: String -> IO()
-announceWinner winner = 
-   do 
+announceWinner winner =
+   do
      putStrLn ("Congratulations " ++ winner ++ " won! \n Play again? y or n")
      yn <- getLine
      if yn == "y"
@@ -192,6 +194,7 @@ gameLoop b1 b2 p1 p2 | gameFinished b1 && gameFinished b2 =
                      | gameFinished b1 = announceWinner p1
                      | gameFinished b2 = announceWinner p2
                      | otherwise =
+
   do
     putStrLn (p1 ++ "\'s board: ")
     printBoard b1
@@ -208,17 +211,18 @@ gameLoop b1 b2 p1 p2 | gameFinished b1 && gameFinished b2 =
 
 gameTurn :: Board -> String -> IO Board
 gameTurn board player = do
-  putStrLn $ player ++ ", guess a row"
-  row <- readLn
-  if ((row-1) < length (rows board) && (row-1) >= 0)
-    then do
-      putStrLn $ player ++ ", guess a column"
-      cell <- readLn
-      if (cell-1) < length ((rows board)!!(row-1)) && (cell-1) >= 0
-        then
-          return (updateBoard board ((row-1), (cell -1)))
-      else do
-        putStrLn $ "Sorry the number is not okay, try again"
-        return board
-  else
-    return board
+  row <- makeGuess board player "row"
+  cell <- makeGuess board player "column"
+  return (updateBoard board ((row-1), (cell -1)))
+
+
+makeGuess :: Board -> String -> String -> IO Int
+makeGuess board player rc =
+       do
+         putStrLn $ "Player " ++ player ++ " guess the " ++ rc
+         ans <- readLn
+         if ((ans-1) < length (rows board) && (ans-1) >= 0)
+            then do return ans
+               else do
+                 putStrLn "Not okay"
+                 makeGuess board player rc
