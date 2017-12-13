@@ -8,7 +8,7 @@ import qualified Data.IntMap as Map
 import qualified Data.List as List
 
 
---"part" of a Board
+-- | "part" of a Board
 data CellState = Hit | Missed | SneakyShip | SneakyWater
    deriving (Eq, Bounded, Enum)
 
@@ -24,7 +24,7 @@ data Board = Board {rows :: [[CellState]]}
 type Pos = (Int,Int)
 type RandomBoards = IntMap(FilePath)
 
---Example boards
+-- | Example boards
 stdBoard :: Board
 stdBoard = Board
     [[ss,ss,sw,sw]
@@ -49,15 +49,15 @@ stdBoard2 = Board
     ss = SneakyShip
     sw = SneakyWater
 
---For quickCheck
+-- | For quickCheck
 genCell :: Gen (CellState)
 genCell = frequency [(7, rSneakyWater), (3, rSneakyShip)]
 
---For quickCheck
+-- | For quickCheck
 rSneakyShip :: Gen (CellState)
 rSneakyShip = elements [SneakyShip]
 
---For quickCheck
+-- | For quickCheck
 rSneakyWater :: Gen (CellState)
 rSneakyWater = elements [SneakyWater]
 
@@ -67,11 +67,11 @@ instance Arbitrary Board where
        return (Board rows)
 
 
---Prints a visual representation of the board
+-- | Prints a visual representation of the board
 printBoard :: Board -> IO()
 printBoard board = mapM_ putStrLn (List.map makePrintable (rows board))
 
---Makes the board to a String to be printed
+-- | Makes the board to a String to be printed
 makePrintable :: [(CellState)] -> String
 makePrintable []     = []
 makePrintable (x:xs) = (show x) ++ makePrintable xs
@@ -80,7 +80,7 @@ makePrintable (x:xs) = (show x) ++ makePrintable xs
 getState :: Board -> Pos -> CellState
 getState board (x,y) = ((rows board) !! x) !! y
 
---Updates the board after a player have guessed
+-- | Updates the board after a player have guessed
 updateBoard :: Board -> Pos -> Board
 updateBoard board pos | getState board pos == SneakyShip
                         = updateBoard' board pos Hit
@@ -93,7 +93,7 @@ updateBoard' board (x,y) cs = Board $ replaceState (rows board)
                                 (x, (replaceState ((rows board)
                                 !! x) (y, cs)))
 
---Tests updateBoard and updateBoard'
+-- | Tests updateBoard and updateBoard'
 prop_updateBoard :: Board -> Pos -> Bool
 prop_updateBoard board (x,y) | getState board (x',y') == SneakyShip
                                = updateBoard' board (x',y') Hit
@@ -106,7 +106,7 @@ prop_updateBoard board (x,y) | getState board (x',y') == SneakyShip
           x' = x `mod` 3
           y' = y `mod` 3
 
---Replace the value of a state with another.
+-- | Replace the value of a state with another.
 replaceState :: [a] -> (Int,a) -> [a]
 replaceState [] (pos,val) = []
 replaceState xs (pos,val) | length xs <= pos = xs
@@ -114,7 +114,7 @@ replaceState xs (pos,val) = let (ys,zs) = splitAt pos xs in ys ++ [val]
                                    ++ (tail zs)
 
 
---Checks if the game is finished
+-- | Checks if the game is finished
 gameFinished :: Board -> Bool
 gameFinished board | length [boardToList board |
                      row <- [0..(length (rows board)) - 1],
@@ -122,28 +122,28 @@ gameFinished board | length [boardToList board |
                      getState board (row,cell) == SneakyShip] == 0 = True
 gameFinished board | otherwise = False
 
---Helps the gameFinished method
+-- | Helps the gameFinished method
 boardToList :: Board -> [CellState]
 boardToList board  = [rightCells | rows <- (rows board), rightCells <- rows]
 
---Checks so the original board and generated list contains same nbr of cells
+-- | Checks so the original board and generated list contains same nbr of cells
 prop_boardToList :: Board -> Bool
 prop_boardToList board = length (boardToList board)
                          == sum [length ((rows board) !! a)
                          | a<-[0..(length(rows board)-1)]]
 
---Funkar inte fukkkking helelelelelleellelelell
---Checks so the original board and generated list contains same cells
-{-prop_boardToList2 :: Board -> Bool
-prop_boardToList2 board = and [(list !! l) == ((rows board) !! y) !! x
-                          | l<-[0..(length list)-1], x<-[0..(length (rows board))-1],
-                            y<-[0..(length ((rows board)!!0))-1] ]
+
+-- | Checks so the original board and generated list contains same cells
+prop_boardToList2 :: Board -> Bool
+prop_boardToList2 board = list == [((rows board) !! x) !! y
+                          | x<-[0..(length (rows board))-1],
+                            y<-[0..(length ((rows board)!!0))-1]]
          where
-           list = boardToList board-}
+           list = boardToList board
 
 
 
---Generates a random int which is the key to the IntMap with boards.
+-- | Generates a random int which is the key to the IntMap with boards.
 randomKey :: IntMap  FilePath ->  StdGen -> IO Board
 randomKey boardMap g = readBoard (boardMap!key)
          where
@@ -194,7 +194,6 @@ gameLoop b1 b2 p1 p2 | gameFinished b1 && gameFinished b2 =
                      | gameFinished b1 = announceWinner p1
                      | gameFinished b2 = announceWinner p2
                      | otherwise =
-
   do
     putStrLn (p1 ++ "\'s board: ")
     printBoard b1
