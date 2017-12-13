@@ -49,6 +49,18 @@ stdBoard2 = Board
     ss = SneakyShip
     sw = SneakyWater
 
+stdBoard3 :: Board
+stdBoard3 = Board
+      [[sw,sw,sw,sw]
+      ,[sw,sw,sw,sw]
+      ,[sw,sw,sw,sw]
+      ,[sw,sw,sw,sw]]
+    where
+      h  = Hit
+      m  = Missed
+      ss = SneakyShip
+      sw = SneakyWater
+
 -- | For quickCheck
 genCell :: Gen (CellState)
 genCell = frequency [(7, rSneakyWater), (3, rSneakyShip)]
@@ -72,7 +84,7 @@ printBoard :: Board -> IO()
 printBoard board = mapM_ putStrLn (List.map makePrintable (rows board))
 
 -- | Makes the board to a String to be printed
-makePrintable :: [(CellState)] -> String
+makePrintable :: [CellState] -> String
 makePrintable []     = []
 makePrintable (x:xs) = (show x) ++ makePrintable xs
 
@@ -110,18 +122,13 @@ prop_updateBoard board (x,y) | getState board (x',y') == SneakyShip
 replaceState :: [a] -> (Int,a) -> [a]
 replaceState [] (pos,val) = []
 replaceState xs (pos,val) | length xs <= pos = xs
-replaceState xs (pos,val) = let (ys,zs) = splitAt pos xs in ys ++ [val]
-                                   ++ (tail zs)
+replaceState xs (pos,val) = let (ys,zs) = splitAt pos xs 
+                            in ys ++ [val] ++ (tail zs)
 
 
 -- | Checks if the game is finished
 gameFinished :: Board -> Bool
-gameFinished board | length [boardToList board |
-                     row <- [0..(length (rows board)) - 1],
-                     cell <- [0..((length (rows board)) -1)],
-                     getState board (row,cell) == SneakyShip] == 0 = True
-gameFinished board | otherwise = False
-
+gameFinished board = not (any (== SneakyShip) (boardToList board))
 
 prop_gameFinished :: Board -> Bool
 prop_gameFinished b | gameFinished b == True 
@@ -152,7 +159,7 @@ prop_boardToList2 board = list == [((rows board) !! x) !! y
 
 
 -- | Generates a random int which is the key to the IntMap with boards.
-randomKey :: IntMap  FilePath ->  StdGen -> IO Board
+randomKey :: IntMap FilePath -> StdGen -> IO Board
 randomKey boardMap g = readBoard (boardMap!key)
          where
            (key,g') = randomR (1, (Map.size boardMap)) g
