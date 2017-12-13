@@ -109,6 +109,7 @@ shuffle g hand |size hand > 0 = (Add card' (shuffle g1 hand'))
         (v1, g1) = randomR (0, ((size hand) - 1)) g
 
 
+
 --Removes the n:th card from the original deck and returns the card and
 --the new deck without the card.
 removeCard :: Hand -> Hand-> Integer -> (Card, Hand)
