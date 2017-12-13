@@ -172,7 +172,11 @@ main = do
   g2 <- newStdGen
   board1 <- (randomKey theMap g1)
   board2 <- (randomKey theMap g2)
-  gameLoop board1 board2 1 2
+  putStrLn "Player 1, enter your name"
+  p1 <- getLine
+  putStrLn "Player 2, enter your name"
+  p2 <- getLine
+  gameLoop board1 board2 p1 p2
 
 announceWinner :: String -> IO()
 announceWinner winner =
@@ -184,40 +188,38 @@ announceWinner winner =
      else
         putStrLn "Hope to see you again!"
 
-gameLoop :: Board -> Board -> Int -> Int -> IO ()
-gameLoop board1 board2 player1 player2 | gameFinished board1 &&
-                                         gameFinished board2 =
-                                         announceWinner "both players"
-                                       | gameFinished board1 =
-                                         announceWinner "Player 1"
-                                       | gameFinished board2 =
-                                         announceWinner "Player 2"
-                                       | otherwise =
+gameLoop :: Board -> Board -> String -> String -> IO ()
+gameLoop b1 b2 p1 p2 | gameFinished b1 && gameFinished b2 = 
+                       announceWinner "both players"
+                     | gameFinished b1 = announceWinner p1
+                     | gameFinished b2 = announceWinner p2
+                     | otherwise =
+
   do
-    putStrLn "Player 1 board: "
-    printBoard board1
-    putStrLn "Player 2 board: "
-    printBoard board2
-    board1 <- (gameTurn board1 player1)
-    putStrLn "Player 1 board: "
-    printBoard board1
-    putStrLn "Player 2 board: "
-    printBoard board2
-    board2 <- (gameTurn board2 player2)
-    gameLoop board1 board2 player1 player2
+    putStrLn (p1 ++ "\'s board: ")
+    printBoard b1
+    putStrLn (p2 ++ "\'s board: ")
+    printBoard b2
+    b1 <- (gameTurn b1 p1)
+    putStrLn (p1 ++ "\'s board: ")
+    printBoard b1
+    putStrLn (p2 ++ "\'s board: ")
+    printBoard b2
+    b2 <- (gameTurn b2 p2)
+    gameLoop b1 b2 p1 p2
 
 
-gameTurn :: Board -> Int -> IO Board
+gameTurn :: Board -> String -> IO Board
 gameTurn board player = do
   row <- makeGuess board player "row"
   cell <- makeGuess board player "column"
   return (updateBoard board ((row-1), (cell -1)))
 
 
-makeGuess :: Board -> Int -> String -> IO Int
+makeGuess :: Board -> String -> String -> IO Int
 makeGuess board player rc =
        do
-         putStrLn $ "Player "++ (show player) ++ " guess the " ++ rc
+         putStrLn $ "Player " ++ player ++ " guess the " ++ rc
          ans <- readLn
          if ((ans-1) < length (rows board) && (ans-1) >= 0)
             then do return ans
