@@ -141,57 +141,7 @@ prop_boardToList2 board = and [(list !! l) == ((rows board) !! y) !! x
          where
            list = boardToList board-}
 
---Använder vi denna?
-generateBoard :: Board
-generateBoard = Board (replicate 4 (replicate 4 (generateCell 11)))
 
---Använder vi denna?
-generateCell :: Int -> CellState
-generateCell nbr | nbr<10 = Hit
-generateCell nbr | otherwise = Missed
-
-{-
-main :: IO ()
-main = do
-  let theMap = fromList ([(1,"b1.boa"),(2,"b2.boa"),(3,"b3.boa"),(4,"b4.boa")
-                        ,(5,"b5.boa"),(6,"b6.boa"),(7,"b7.boa"),(8,"b8.boa"),
-                        (9,"b9.boa"),(10,"b10.boa"),(11,"b11.boa"),
-                        (12,"b12.boa"),(13,"b13.boa")])
-  putStrLn "Hello and Welcome to BattleShip"
-  g <- newStdGen
-  board <- (randomKey theMap g)
-  gameLoop board
--}
-{-
-gameLoop :: Board -> IO ()
-gameLoop board = do
-  printBoard board
-  if gameFinished board == True
-    then do
-      putStrLn "Congratulations you won! \n Play again? y or n"
-      yn <- getLine
-      if yn == "y"
-        then main
-        else
-          putStrLn "Hope to see you again!"
-    else do
-       putStrLn "First guess the row"
-       row <- readLn
-       if (row-1) < length (rows board) && (row-1) >= 0
-         then do
-             putStrLn "Now guess the column"
-             cell <- readLn
-             if (cell-1) < length ((rows board)!!(row-1)) && (cell-1) >= 0
-               then do
-                 gameLoop (updateBoard board (row -1, cell -1))
-               else do
-                 putStrLn "Sorry the number is not okay, try again"
-                 gameLoop board
-
-         else do
-           putStrLn "Sorry the number is not okay, try again"
-           gameLoop board
--}
 
 --Generates a random int which is the key to the IntMap with boards.
 randomKey :: IntMap  FilePath ->  StdGen -> IO Board
@@ -209,9 +159,6 @@ readBoard file = do
         makeBoard (x:xs) | x == 'S' = SneakyShip : (makeBoard xs)
         makeBoard (x:xs) | x == 'W' = SneakyWater : (makeBoard xs)
         makeBoard x      | otherwise = []
-
--------
-
 
 main :: IO ()
 main = do
@@ -264,34 +211,6 @@ gameLoop board1 board2 player1 player2 | otherwise =
     board2 <- (gameTurn board2 player2)
     gameLoop board1 board2 player1 player2
 
-{-}
-  putStrLn "Player 1 board: "
-  printBoard board1
-  putStrLn "Player 2 board: "
-  printBoard board2
-  if (gameFinished board1)
-    then do
-      putStrLn "Congratulations Player 1 won! \n Play again? y or n"
-      yn <- getLine
-      if yn == "y"
-        then main
-      else
-        putStrLn "Hope to see you again!"
-    else if gameFinished board2 == True
-      then do
-        putStrLn "Congratulations Player 2 won! \n Play again? y or n"
-        yn <- getLine
-        if yn == "y"
-          then main
-          else
-            putStrLn "Hope to see you again!"
-      else
-        board1 <- (gameTurn board1 player1)
-        board2 <- (gameTurn board1 player2)
-        gameLoop board1 board2 player1 player2
--}
-
-
 
 gameTurn :: Board -> Int -> IO Board
 gameTurn board player = do
@@ -303,7 +222,6 @@ gameTurn board player = do
       cell <- readLn
       if (cell-1) < length ((rows board)!!(row-1)) && (cell-1) >= 0
         then do
-        --  updateBoard board (row -1, cell -1)
           return (updateBoard board ((row-1), (cell -1)))
       else do
         putStrLn $ "Sorry the number is not okay, try again"
