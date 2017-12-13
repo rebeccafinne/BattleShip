@@ -122,6 +122,11 @@ gameFinished board | length [boardToList board |
                      getState board (row,cell) == SneakyShip] == 0 = True
 gameFinished board | otherwise = False
 
+prop_gameFinished :: Board -> Bool
+prop_gameFinished b | gameFinished b == True = SneakyShip `notElem` (boardToList b)
+prop_gameFinished b | otherwise = SneakyShip `elem` (boardToList b)
+
+
 --Helps the gameFinished method
 boardToList :: Board -> [CellState]
 boardToList board  = [rightCells | rows <- (rows board), rightCells <- rows]
@@ -189,7 +194,7 @@ announceWinner winner =
         putStrLn "Hope to see you again!"
 
 gameLoop :: Board -> Board -> String -> String -> IO ()
-gameLoop b1 b2 p1 p2 | gameFinished b1 && gameFinished b2 = 
+gameLoop b1 b2 p1 p2 | gameFinished b1 && gameFinished b2 =
                        announceWinner "both players"
                      | gameFinished b1 = announceWinner p1
                      | gameFinished b2 = announceWinner p2
