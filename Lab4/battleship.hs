@@ -160,6 +160,8 @@ readBoard file = do
         makeBoard (x:xs) | x == 'W' = SneakyWater : (makeBoard xs)
         makeBoard x      | otherwise = []
 
+
+
 main :: IO ()
 main = do
   let theMap = fromList ([(1,"b1.boa"),(2,"b2.boa"),(3,"b3.boa"),(4,"b4.boa")
@@ -216,15 +218,24 @@ gameTurn :: Board -> Int -> IO Board
 gameTurn board player = do
   putStrLn $ "Player " ++ (show player) ++ " guess the row"
   row <- readLn
-  if ((row-1) < length (rows board) && (row-1) >= 0)
-    then do
-      putStrLn $ "Player "++ (show player) ++ " guess the column"
-      cell <- readLn
-      if (cell-1) < length ((rows board)!!(row-1)) && (cell-1) >= 0
+  untilM row board
+  putStrLn $ "Player "++ (show player) ++ " guess the column"
+  cell <- readLn
+  untilM cell board
+  return (updateBoard board ((row-1), (cell -1)))
+    {-}  if (cell-1) < length ((rows board)!!(row-1)) && (cell-1) >= 0
         then do
-          return (updateBoard board ((row-1), (cell -1)))
+
       else do
         putStrLn $ "Sorry the number is not okay, try again"
         return board
   else do
-    return board
+    return board-}
+
+
+untilM :: Int -> Board -> IO Int
+untilM ans board =
+       do
+          if ((ans-1) < length (rows board) && (ans-1) >= 0)
+            then do return ans
+               else do untilM ans board
