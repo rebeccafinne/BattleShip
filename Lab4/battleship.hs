@@ -183,6 +183,7 @@ main = do
   p2 <- getLine
   gameLoop board1 board2 p1 p2
 
+
 announceWinner :: String -> IO()
 announceWinner winner =
    do
@@ -213,14 +214,15 @@ gameLoop b1 b2 p1 p2 | gameFinished b1 && gameFinished b2 =
     b2 <- (gameTurn b2 p2)
     gameLoop b1 b2 p1 p2
 
-
+-- | Make sure both players can make a guess
 gameTurn :: Board -> String -> IO Board
 gameTurn board player = do
   row <- makeGuess board player "row"
   cell <- makeGuess board player "column"
   return (updateBoard board ((row-1), (cell -1)))
 
-
+-- | The player makes a guess, have to redo guess if
+-- the number is outside the board
 makeGuess :: Board -> String -> String -> IO Int
 makeGuess board player rc =
        do
