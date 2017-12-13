@@ -124,11 +124,17 @@ gameFinished board | otherwise = False
 
 
 prop_gameFinished :: Board -> Bool
-prop_gameFinished b | gameFinished b == True = SneakyShip `notElem` (boardToList b)
+prop_gameFinished b | gameFinished b == True 
+                      = SneakyShip `notElem` (boardToList b)
 prop_gameFinished b | otherwise = SneakyShip `elem` (boardToList b)
 
 
--- | Checks so the original board and generated list contains same nbr of cells
+--Helps the gameFinished method
+boardToList :: Board -> [CellState]
+boardToList board  = [rightCells | rows <- (rows board), rightCells <- rows]
+
+
+-- | Checks so original board and generated list contains same nbr of cells
 prop_boardToList :: Board -> Bool
 prop_boardToList board = length (boardToList board)
                          == sum [length ((rows board) !! a)
