@@ -3,9 +3,6 @@ import Data.Maybe
 import Data.List
 import System.Random
 import Data.Eq
-import Data.IntMap
-import qualified Data.IntMap as Map
-import qualified Data.List as List
 
 
 -- | "part" of a Board
@@ -22,7 +19,6 @@ data Board = Board {rows :: [[CellState]], size::Int}
     deriving (Show, Eq)
 
 type Pos = (Int,Int)
-type RandomBoards = IntMap(FilePath)
 
 -- | Example boards
 stdBoard :: Board
@@ -89,7 +85,7 @@ instance Arbitrary Board where
 
 -- | Prints a visual representation of the board
 printBoard :: Board -> IO()
-printBoard board = mapM_ putStrLn (List.map makePrintable (rows board))
+printBoard board = mapM_ putStrLn (map makePrintable (rows board))
 
 -- | Makes the board to a String to be printed
 makePrintable :: [CellState] -> String
