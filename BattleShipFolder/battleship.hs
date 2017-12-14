@@ -185,16 +185,23 @@ readBoard file = do
         makeBoard x      | otherwise = []
 
 -- | Creates a random game board
-createBoard :: Int -> Board
-createBoard bSize = insertShip (createBoard bSize)
+createBoard :: Int -> StdGen -> Board
+createBoard bSize g = insertShip (createWaterBoard bSize) g
 
 -- | Inserts a ship on a random position on a board
-insertShip :: Board -> Board
-insertShip board = undefined
+insertShip :: Board -> StdGen -> Board
+insertShip board g = Board  {rows = replaceState (rows board)
+                                ((getRandomPos g board), (replaceState ((rows board)
+                                !! (getRandomPos g board)) ((getRandomPos g board), SneakyShip))), Main.size = Main.size board}
+
+getRandomPos :: StdGen -> Board -> Int
+getRandomPos g board = pos
+     where
+       (pos,g1) = randomR (0,Main.size board) g
 
 -- | Creates a game board only consisting of water
 createWaterBoard :: Int -> Board
-createWaterBoard bSize = Board {rows = (replicate bSize 
+createWaterBoard bSize = Board {rows = (replicate bSize
                     (replicate bSize SneakyWater)), Main.size = bSize}
 
 -- | Takes user input for size of board
@@ -202,23 +209,24 @@ chooseBoardSize :: IO Int
 chooseBoardSize = do
   bSize <- readLn
   if ((bSize<4) || (bSize>10))
-     then do 
+     then do
        putStrLn "The size has to be between 4 and 10, please try again"
        chooseBoardSize
-     else 
+     else
        return bSize
 
 main :: IO ()
 main = do
   putStrLn "Choose a board size between 4 and 10"
-  chooseBoardSize
+  s <- chooseBoardSize
   let theMap = fromList ([(1,"b1.boa"),(2,"b2.boa"),(3,"b3.boa"),(4,"b4.boa")
                         ,(5,"b5.boa"),(6,"b6.boa"),(7,"b7.boa"),(8,"b8.boa"),
                         (9,"b9.boa"),(10,"b10.boa"),(11,"b11.boa"),
                         (12,"b12.boa")])
   g1 <- newStdGen
   g2 <- newStdGen
-  board1 <- (randomKey theMap g1)
+  let board1 = createBoard s g2
+  --board1 <- (randomKey theMap g1)
   board2 <- (randomKey theMap g2)
   putStrLn "Player 1, enter your name"
   p1 <- getLine
