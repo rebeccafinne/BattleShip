@@ -184,10 +184,23 @@ readBoard file = do
         makeBoard (x:xs) | x == 'W' = SneakyWater : (makeBoard xs)
         makeBoard x      | otherwise = []
 
+{-createBoard :: Int -> Board
+createBoard bSize = -}
 
+chooseBoardSize :: IO Int
+chooseBoardSize = do
+  bSize <- readLn
+  if ((bSize<4) || (bSize>10))
+     then do 
+       putStrLn "The size has to be between 4 and 10, please try again"
+       chooseBoardSize
+     else 
+       return bSize
 
 main :: IO ()
 main = do
+  putStrLn "Choose a board size between 4 and 10"
+  chooseBoardSize
   let theMap = fromList ([(1,"b1.boa"),(2,"b2.boa"),(3,"b3.boa"),(4,"b4.boa")
                         ,(5,"b5.boa"),(6,"b6.boa"),(7,"b7.boa"),(8,"b8.boa"),
                         (9,"b9.boa"),(10,"b10.boa"),(11,"b11.boa"),
