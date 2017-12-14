@@ -15,7 +15,7 @@ data CellState = Hit | Missed | SneakyShip | SneakyWater
 instance Show CellState where
   show Hit           = "X"
   show Missed        = "O"
-  show SneakyShip    = "."
+  show SneakyShip    = "s"
   show SneakyWater   = "."
 
 data Board = Board {rows :: [[CellState]], size::Int}
@@ -166,27 +166,32 @@ prop_boardToList2 board = list == [((rows board) !! x) !! y
 
 -- | Creates a random game board
 createBoard :: Int -> StdGen -> Board
-createBoard bSize g = insertShip (createWaterBoard bSize) g
+createBoard bSize g = board2
+                where 
+                  (board2, gen2) = insertShip board gen
+                  (board, gen) = insertShip (createWaterBoard bSize) g
 
 -- | Inserts a ship on a random position on a board
-insertShip :: Board -> StdGen -> Board
-insertShip board g = updateBoard' board pos SneakyShip
+insertShip :: Board -> StdGen -> (Board, StdGen)
+insertShip board g = if ((getState board (row,cell) == SneakyShip) || 
+                        (getState board (row,cell+1) == SneakyShip))
+                        then 
+                          insertShip board gen
+                        else 
+                          ((updateBoard' 
+                          (updateBoard' board (row,cell) SneakyShip) 
+                          (row,cell+1) SneakyShip), gen)
                       where
-                        pos = (getRandomPos g board)
+                        ((row,cell), gen) = (getRandomPos g board)
 
 
-getRandomPos :: StdGen -> Board -> Pos
-getRandomPos g board = (row,cell)
+
+getRandomPos :: StdGen -> Board -> (Pos, StdGen)
+getRandomPos g board = ((row,cell), g2)
      where
        (row,g1) = randomR (0,(Main.size board)-1) g
-       (cell,g2) = randomR (0,(Main.size board)-1) g1
+       (cell,g2) = randomR (0,(Main.size board)-2) g1
 
-
-getRow :: Pos -> Int
-getRow (row,cell) = row
-
-getCell :: Pos -> Int
-getCell (row, cell) = cell
 
 -- | Creates a game board only consisting of water
 createWaterBoard :: Int -> Board
