@@ -184,9 +184,20 @@ readBoard file = do
         makeBoard (x:xs) | x == 'W' = SneakyWater : (makeBoard xs)
         makeBoard x      | otherwise = []
 
-{-createBoard :: Int -> Board
-createBoard bSize = -}
+-- | Creates a random game board
+createBoard :: Int -> Board
+createBoard bSize = insertShip (createBoard bSize)
 
+-- | Inserts a ship on a random position on a board
+insertShip :: Board -> Board
+insertShip board = undefined
+
+-- | Creates a game board only consisting of water
+createWaterBoard :: Int -> Board
+createWaterBoard bSize = Board {rows = (replicate bSize 
+                    (replicate bSize SneakyWater)), Main.size = bSize}
+
+-- | Takes user input for size of board
 chooseBoardSize :: IO Int
 chooseBoardSize = do
   bSize <- readLn
