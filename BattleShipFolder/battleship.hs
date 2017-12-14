@@ -164,26 +164,6 @@ prop_boardToList2 board = list == [((rows board) !! x) !! y
          where
            list = boardToList board
 
-
-
--- | Generates a random int which is the key to the IntMap with boards.
-randomKey :: IntMap FilePath -> StdGen -> IO Board
-randomKey boardMap g = readBoard (boardMap!key)
-         where
-           (key,g') = randomR (1, (Map.size boardMap)) g
-
-
-readBoard :: FilePath -> IO Board
-readBoard file = do
-  boardFile <- readFile file
-  return (Board {rows = (List.map makeBoard $ lines boardFile),
-                  Main.size = length(List.map makeBoard $ lines boardFile)})
-      where
-        makeBoard :: String -> [CellState]
-        makeBoard (x:xs) | x == 'S' = SneakyShip : (makeBoard xs)
-        makeBoard (x:xs) | x == 'W' = SneakyWater : (makeBoard xs)
-        makeBoard x      | otherwise = []
-
 -- | Creates a random game board
 createBoard :: Int -> StdGen -> Board
 createBoard bSize g = insertShip (createWaterBoard bSize) g
@@ -219,15 +199,10 @@ main :: IO ()
 main = do
   putStrLn "Choose a board size between 4 and 10"
   s <- chooseBoardSize
-  let theMap = fromList ([(1,"b1.boa"),(2,"b2.boa"),(3,"b3.boa"),(4,"b4.boa")
-                        ,(5,"b5.boa"),(6,"b6.boa"),(7,"b7.boa"),(8,"b8.boa"),
-                        (9,"b9.boa"),(10,"b10.boa"),(11,"b11.boa"),
-                        (12,"b12.boa")])
   g1 <- newStdGen
   g2 <- newStdGen
-  let board1 = createBoard s g2
-  --board1 <- (randomKey theMap g1)
-  board2 <- (randomKey theMap g2)
+  let board1 = createBoard s g1
+  let board2 = createBoard s g2
   putStrLn "Player 1, enter your name"
   p1 <- getLine
   putStrLn "Player 2, enter your name"
