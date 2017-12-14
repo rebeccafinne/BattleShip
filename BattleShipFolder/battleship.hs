@@ -12,7 +12,7 @@ data CellState = Hit | Missed | SneakyShip | SneakyWater
 instance Show CellState where
   show Hit           = "X"
   show Missed        = "O"
-  show SneakyShip    = "s"
+  show SneakyShip    = "."
   show SneakyWater   = "."
 
 data Board = Board {rows :: [[CellState]], size::Int}
