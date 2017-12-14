@@ -170,14 +170,23 @@ createBoard bSize g = insertShip (createWaterBoard bSize) g
 
 -- | Inserts a ship on a random position on a board
 insertShip :: Board -> StdGen -> Board
-insertShip board g = Board  {rows = replaceState (rows board)
-                                ((getRandomPos g board), (replaceState ((rows board)
-                                !! (getRandomPos g board)) ((getRandomPos g board), SneakyShip))), Main.size = Main.size board}
+insertShip board g = updateBoard' board pos SneakyShip
+                      where
+                        pos = (getRandomPos g board)
 
-getRandomPos :: StdGen -> Board -> Int
-getRandomPos g board = pos
+
+getRandomPos :: StdGen -> Board -> Pos
+getRandomPos g board = (row,cell)
      where
-       (pos,g1) = randomR (0,Main.size board) g
+       (row,g1) = randomR (0,(Main.size board)-1) g
+       (cell,g2) = randomR (0,(Main.size board)-1) g1
+
+
+getRow :: Pos -> Int
+getRow (row,cell) = row
+
+getCell :: Pos -> Int
+getCell (row, cell) = cell
 
 -- | Creates a game board only consisting of water
 createWaterBoard :: Int -> Board
