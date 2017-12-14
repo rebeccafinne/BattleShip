@@ -18,7 +18,7 @@ instance Show CellState where
   show SneakyShip    = "."
   show SneakyWater   = "."
 
-data Board = Board {rows :: [[CellState]]}
+data Board = Board {rows :: [[CellState]], size::Int}
     deriving (Show, Eq)
 
 type Pos = (Int,Int)
@@ -27,10 +27,11 @@ type RandomBoards = IntMap(FilePath)
 -- | Example boards
 stdBoard :: Board
 stdBoard = Board
-    [[ss,ss,sw,sw]
+    {rows=[[ss,ss,sw,sw]
     ,[sw,sw,sw,sw]
     ,[sw,ss,ss,sw]
-    ,[sw,sw,sw,sw]]
+    ,[sw,sw,sw,sw]],
+    Main.size = 4}
   where
     h  = Hit
     m  = Missed
@@ -38,11 +39,12 @@ stdBoard = Board
     sw = SneakyWater
 
 stdBoard2 :: Board
-stdBoard2 = Board
-    [[ss,ss,ss,ss]
+stdBoard2 = Board {
+    rows = [[ss,ss,ss,ss]
     ,[ss,ss,ss,ss]
     ,[ss,ss,ss,ss]
-    ,[ss,ss,ss,ss]]
+    ,[ss,ss,ss,ss]],
+    Main.size = 4}
   where
     h  = Hit
     m  = Missed
@@ -50,11 +52,12 @@ stdBoard2 = Board
     sw = SneakyWater
 
 stdBoard3 :: Board
-stdBoard3 = Board
-      [[sw,sw,sw,sw]
+stdBoard3 = Board {
+      rows = [[sw,sw,sw,sw]
       ,[sw,sw,sw,sw]
       ,[sw,sw,sw,sw]
-      ,[sw,sw,sw,sw]]
+      ,[sw,sw,sw,sw]],
+      Main.size = 4}
     where
       h  = Hit
       m  = Missed
@@ -73,10 +76,15 @@ rSneakyShip = elements [SneakyShip]
 rSneakyWater :: Gen (CellState)
 rSneakyWater = elements [SneakyWater]
 
+genSize :: Gen (Int)
+genSize = elements [4..10]
+
 instance Arbitrary Board where
   arbitrary =
-    do rows <- vectorOf 4 (vectorOf 4 genCell)
-       return (Board rows)
+    do
+      bsize <- genSize
+      rows <- vectorOf bsize (vectorOf bsize genCell)
+      return (Board rows bsize)
 
 
 -- | Prints a visual representation of the board
@@ -101,9 +109,9 @@ updateBoard board pos | getState board pos == SneakyWater
 updateBoard board pos | otherwise = board
 
 updateBoard' :: Board -> Pos -> CellState -> Board
-updateBoard' board (x,y) cs = Board $ replaceState (rows board)
+updateBoard' board (x,y) cs = Board  {rows = replaceState (rows board)
                                 (x, (replaceState ((rows board)
-                                !! x) (y, cs)))
+                                !! x) (y, cs))), Main.size = Main.size board}
 
 -- | Tests updateBoard and updateBoard'
 prop_updateBoard :: Board -> Pos -> Bool
@@ -122,7 +130,7 @@ prop_updateBoard board (x,y) | getState board (x',y') == SneakyShip
 replaceState :: [a] -> (Int,a) -> [a]
 replaceState [] (pos,val) = []
 replaceState xs (pos,val) | length xs <= pos = xs
-replaceState xs (pos,val) = let (ys,zs) = splitAt pos xs 
+replaceState xs (pos,val) = let (ys,zs) = splitAt pos xs
                             in ys ++ [val] ++ (tail zs)
 
 
@@ -131,7 +139,7 @@ gameFinished :: Board -> Bool
 gameFinished board = not (any (== SneakyShip) (boardToList board))
 
 prop_gameFinished :: Board -> Bool
-prop_gameFinished b | gameFinished b == True 
+prop_gameFinished b | gameFinished b == True
                       = SneakyShip `notElem` (boardToList b)
 prop_gameFinished b | otherwise = SneakyShip `elem` (boardToList b)
 
@@ -168,7 +176,8 @@ randomKey boardMap g = readBoard (boardMap!key)
 readBoard :: FilePath -> IO Board
 readBoard file = do
   boardFile <- readFile file
-  return (Board $ List.map makeBoard $ lines boardFile)
+  return (Board {rows = (List.map makeBoard $ lines boardFile),
+                  Main.size = length(List.map makeBoard $ lines boardFile)})
       where
         makeBoard :: String -> [CellState]
         makeBoard (x:xs) | x == 'S' = SneakyShip : (makeBoard xs)
